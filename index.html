@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>增强版番茄时钟</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #e74c3c;
+            --primary-dark: #c0392b;
+            --secondary: #3498db;
+            --secondary-dark: #2980b9;
+            --light: #ecf0f1;
+            --dark: #2c3e50;
+            --success: #2ecc71;
+            --warning: #f39c12;
+            --test: #9b59b6;
+            --transition: all 0.3s ease;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: var(--light);
+            transition: background-color 0.5s;
+        }
+        
+        .container {
+            background: rgba(44, 62, 80, 0.9);
+            border-radius: 20px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+            width: 100%;
+            max-width: 500px;
+            overflow: hidden;
+            animation: fadeIn 0.8s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        header {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            text-align: center;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        header h1 {
+            font-size: 2.2rem;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+        
+        .tomato-icon {
+            color: var(--primary);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.15);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .stat-box {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--success);
+        }
+        
+        .timer-container {
+            padding: 40px 20px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .timer-display {
+            font-size: 5rem;
+            font-weight: 700;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            text-shadow: 0 0 10px rgba(231, 76, 60, 0.5);
+            letter-spacing: 3px;
+        }
+        
+        .mode-indicator {
+            display: inline-block;
+            padding: 8px 20px;
+            border-radius: 30px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            background: var(--primary);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: background-color 0.3s;
+        }
+        
+        .mode-indicator.break {
+            background: var(--secondary);
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin: 25px 0;
+        }
+        
+        .btn {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn:active {
+            transform: translateY(3px);
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+        
+        .btn-secondary {
+            background: var(--secondary);
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: var(--secondary-dark);
+        }
+        
+        .btn-warning {
+            background: var(--warning);
+            color: white;
+        }
+        
+        .btn-warning:hover {
+            background: #e67e22;
+        }
+        
+        .btn-test {
+            background: var(--test);
+            color: white;
+        }
+        
+        .btn-test:hover {
+            background: #8e44ad;
+        }
+        
+        .settings {
+            padding: 25px;
+            background: rgba(0, 0, 0, 0.2);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .setting-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .setting-label {
+            font-size: 1.1rem;
+        }
+        
+        .setting-input {
+            width: 100px;
+            padding: 10px 15px;
+            border-radius: 10px;
+            border: none;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 1.1rem;
+            text-align: center;
+            border: 2px solid transparent;
+        }
+        
+        .setting-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        
+        .notification-panel {
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.2);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+        }
+        
+        .notification-text {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
+        .time-sync {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 10px;
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            color: var(--dark);
+            padding: 20px 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            display: none;
+            animation: slideIn 0.5s ease-out;
+            max-width: 90%;
+        }
+        
+        @keyframes slideIn {
+            from { top: -100px; opacity: 0; }
+            to { top: 20px; opacity: 1; }
+        }
+        
+        .notification.show {
+            display: block;
+        }
+        
+        .notification-title {
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .flash {
+            animation: flash 0.5s infinite;
+        }
+        
+        @keyframes flash {
+            0%, 100% { background-color: transparent; }
+            50% { background-color: var(--primary); }
+        }
+        
+        .progress-bar {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        
+        .progress {
+            height: 100%;
+            background: var(--primary);
+            width: 0%;
+            transition: width 1s linear;
+        }
+        
+        .break .progress {
+            background: var(--secondary);
+        }
+        
+        footer {
+            text-align: center;
+            padding: 15px;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.6);
+            background: rgba(0, 0, 0, 0.2);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        /* 网络状态面板 */
+        .status-panel {
+            display: flex;
+            justify-content: space-around;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.2);
+            margin-top: 10px;
+            border-radius: 10px;
+        }
+        
+        .status-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 0.9rem;
+        }
+        
+        .status-label {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #aaa;
+        }
+        
+        .status-value {
+            font-weight: bold;
+            color: var(--success);
+        }
+        
+        .offline .status-value {
+            color: var(--primary);
+        }
+        
+        .test-alert {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: #9b59b6;
+            color: white;
+            text-align: center;
+            padding: 10px;
+            font-weight: bold;
+            z-index: 2000;
+            transform: translateY(-100%);
+            transition: transform 0.3s ease;
+        }
+        
+        .test-alert.show {
+            transform: translateY(0);
+        }
+        
+        @media (max-width: 480px) {
+            .timer-display {
+                font-size: 3.5rem;
+            }
+            
+            .btn {
+                padding: 12px 20px;
+                font-size: 0.9rem;
+                min-width: 140px;
+            }
+            
+            .controls {
+                gap: 10px;
+            }
+            
+            .status-panel {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+        
+        .permission-info {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 10px;
+            font-size: 0.85rem;
+            text-align: center;
+        }
+        
+        .permission-info a {
+            color: #3498db;
+            text-decoration: none;
+        }
+        
+        .notification-icon {
+            width: 64px;
+            height: 64px;
+            margin: 10px auto;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-alert" id="test-alert">正在测试通知功能...</div>
+    
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-clock tomato-icon"></i> 增强版番茄时钟</h1>
+            <p>专注工作，高效休息</p>
+        </header>
+        
+        <div class="stats">
+            <div class="stat-box">
+                <div class="stat-label">今日番茄</div>
+                <div class="stat-value" id="today-count">0</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">总番茄</div>
+                <div class="stat-value" id="total-count">0</div>
+            </div>
+        </div>
+        
+        <div class="timer-container">
+            <div class="mode-indicator" id="mode-indicator">专注时间</div>
+            <div class="timer-display" id="timer">25:00</div>
+            
+            <div class="progress-bar">
+                <div class="progress" id="progress"></div>
+            </div>
+            
+            <div class="controls">
+                <button class="btn btn-primary" id="start-btn">
+                    <i class="fas fa-play"></i> 开始
+                </button>
+                <button class="btn btn-warning" id="pause-btn" disabled>
+                    <i class="fas fa-pause"></i> 暂停
+                </button>
+                <button class="btn btn-secondary" id="reset-btn">
+                    <i class="fas fa-redo"></i> 重置
+                </button>
+                <button class="btn btn-test" id="test-btn">
+                    <i class="fas fa-bell"></i> 测试通知
+                </button>
+            </div>
+        </div>
+        
+        <div class="settings">
+            <div class="setting-row">
+                <span class="setting-label">专注时间 (分钟):</span>
+                <input type="number" min="1" max="120" value="25" class="setting-input" id="work-time">
+            </div>
+            <div class="setting-row">
+                <span class="setting-label">休息时间 (分钟):</span>
+                <input type="number" min="1" max="60" value="5" class="setting-input" id="break-time">
+            </div>
+        </div>
+        
+        <div class="notification-panel">
+            <div class="notification-text">
+                网页切到后台后仍可自动校准时间，确保计时准确
+            </div>
+            <div class="time-sync" id="sync-status">
+                <i class="fas fa-sync-alt"></i> 时间已同步
+            </div>
+            
+            <div class="status-panel" id="status-panel">
+                <div class="status-item" id="network-status">
+                    <span class="status-label">网络状态</span>
+                    <span class="status-value">在线</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">最后校准</span>
+                    <span class="status-value" id="last-sync">--:--:--</span>
+                </div>
+            </div>
+            
+            <div class="permission-info" id="permission-info">
+                <i class="fas fa-info-circle"></i> 通知功能状态: 
+                <span id="notification-status">未请求</span>
+            </div>
+        </div>
+        
+        <footer>
+            <p>番茄工作法：25分钟专注工作 + 5分钟休息 | 每4个番茄钟后进行一次长休息</p>
+        </footer>
+    </div>
+    
+    <div class="notification" id="notification">
+        <div class="notification-title">
+            <i class="fas fa-bell"></i>
+            <span id="notification-title">专注时间结束!</span>
+        </div>
+        <div id="notification-message">该休息一下了，站起来活动活动吧！</div>
+    </div>
+    
+    <audio id="alarm-sound" preload="auto">
+        <source src="https://assets.mixkit.co/sfx/preview/mixkit-alarm-digital-clock-beep-989.mp3" type="audio/mpeg">
+    </audio>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // DOM 元素
+            const timerDisplay = document.getElementById('timer');
+            const startBtn = document.getElementById('start-btn');
+            const pauseBtn = document.getElementById('pause-btn');
+            const resetBtn = document.getElementById('reset-btn');
+            const testBtn = document.getElementById('test-btn');
+            const workTimeInput = document.getElementById('work-time');
+            const breakTimeInput = document.getElementById('break-time');
+            const modeIndicator = document.getElementById('mode-indicator');
+            const todayCount = document.getElementById('today-count');
+            const totalCount = document.getElementById('total-count');
+            const notification = document.getElementById('notification');
+            const notificationTitle = document.getElementById('notification-title');
+            const notificationMessage = document.getElementById('notification-message');
+            const alarmSound = document.getElementById('alarm-sound');
+            const progressBar = document.getElementById('progress');
+            const syncStatus = document.getElementById('sync-status');
+            const networkStatus = document.getElementById('network-status');
+            const lastSync = document.getElementById('last-sync');
+            const testAlert = document.getElementById('test-alert');
+            const notificationStatus = document.getElementById('notification-status');
+            const permissionInfo = document.getElementById('permission-info');
+            
+            // 状态变量
+            let workDuration = parseInt(workTimeInput.value) * 60;
+            let breakDuration = parseInt(breakTimeInput.value) * 60;
+            let timeLeft = workDuration;
+            let isRunning = false;
+            let isWorkMode = true;
+            let timerId = null;
+            let startTimestamp = 0;
+            let lastSyncTime = Date.now();
+            let backgroundStartTime = 0;
+            let backgroundTime = 0;
+            
+            // 番茄钟计数
+            let todayTomatoes = 0;
+            let totalTomatoes = 0;
+            
+            // 初始化计数
+            loadTomatoCount();
+            updateCountDisplay();
+            
+            // 事件监听
+            startBtn.addEventListener('click', startTimer);
+            pauseBtn.addEventListener('click', pauseTimer);
+            resetBtn.addEventListener('click', resetTimer);
+            testBtn.addEventListener('click', testNotifications);
+            workTimeInput.addEventListener('change', updateWorkTime);
+            breakTimeInput.addEventListener('change', updateBreakTime);
+            
+            // 页面可见性变化事件
+            document.addEventListener('visibilitychange', handleVisibilityChange);
+            
+            // 网络状态监听
+            window.addEventListener('online', updateNetworkStatus);
+            window.addEventListener('offline', updateNetworkStatus);
+            
+            // 初始化
+            updateNetworkStatus();
+            updateTimerDisplay();
+            
+            // 请求通知权限（只在第一次访问时）
+            requestNotificationPermission();
+            
+            // 加载番茄钟计数
+            function loadTomatoCount() {
+                const today = new Date().toDateString();
+                const savedToday = localStorage.getItem('pomodoroToday');
+                const savedDate = localStorage.getItem('pomodoroDate');
+                
+                if (savedToday && savedDate === today) {
+                    todayTomatoes = parseInt(savedToday);
+                } else {
+                    todayTomatoes = 0;
+                    localStorage.setItem('pomodoroDate', today);
+                }
+                
+                totalTomatoes = parseInt(localStorage.getItem('pomodoroTotal')) || 0;
+            }
+            
+            // 保存番茄钟计数
+            function saveTomatoCount() {
+                localStorage.setItem('pomodoroToday', todayTomatoes.toString());
+                localStorage.setItem('pomodoroTotal', totalTomatoes.toString());
+                localStorage.setItem('pomodoroDate', new Date().toDateString());
+            }
+            
+            // 请求通知权限
+            function requestNotificationPermission() {
+                if (!('Notification' in window)) {
+                    notificationStatus.textContent = "浏览器不支持通知";
+                    return;
+                }
+                
+                // 检查是否已经请求过权限
+                const permissionRequested = localStorage.getItem('notificationPermissionRequested');
+                
+                if (permissionRequested) {
+                    // 已经请求过权限，只更新状态显示
+                    updateNotificationStatus();
+                    return;
+                }
+                
+                // 第一次访问，请求权限
+                Notification.requestPermission().then(permission => {
+                    // 标记已请求过权限
+                    localStorage.setItem('notificationPermissionRequested', 'true');
+                    updateNotificationStatus();
+                });
+            }
+            
+            // 更新通知权限状态显示
+            function updateNotificationStatus() {
+                if (!('Notification' in window)) return;
+                
+                switch(Notification.permission) {
+                    case 'granted':
+                        notificationStatus.textContent = "已授予";
+                        notificationStatus.style.color = "#2ecc71";
+                        permissionInfo.innerHTML = '<i class="fas fa-check-circle"></i> 通知权限已授予';
+                        break;
+                    case 'denied':
+                        notificationStatus.textContent = "已拒绝";
+                        notificationStatus.style.color = "#e74c3c";
+                        permissionInfo.innerHTML = `
+                            <i class="fas fa-exclamation-triangle"></i> 
+                            通知权限被拒绝。请<a href="#" onclick="showPermissionHelp()">点击这里</a>查看如何启用通知
+                        `;
+                        break;
+                    default:
+                        notificationStatus.textContent = "未授予";
+                        notificationStatus.style.color = "#f39c12";
+                        permissionInfo.innerHTML = `
+                            <i class="fas fa-info-circle"></i> 
+                            通知权限未授予。请<a href="#" onclick="requestNotificationPermission()">点击这里请求权限</a>
+                        `;
+                }
+            }
+            
+            // 更新计数显示
+            function updateCountDisplay() {
+                todayCount.textContent = todayTomatoes;
+                totalCount.textContent = totalTomatoes;
+            }
+            
+            // 开始计时器
+            function startTimer() {
+                if (!isRunning) {
+                    isRunning = true;
+                    startBtn.disabled = true;
+                    pauseBtn.disabled = false;
+                    workTimeInput.disabled = true;
+                    breakTimeInput.disabled = true;
+                    
+                    // 根据当前模式设置总时间
+                    const totalDuration = isWorkMode ? workDuration : breakDuration;
+                    startTimestamp = Date.now() - (totalDuration - timeLeft) * 1000;
+                    
+                    lastSyncTime = Date.now();
+                    
+                    timerId = setInterval(updateTimer, 100);
+                }
+            }
+            
+            // 暂停计时器
+            function pauseTimer() {
+                if (isRunning) {
+                    isRunning = false;
+                    startBtn.disabled = false;
+                    pauseBtn.disabled = true;
+                    clearInterval(timerId);
+                }
+            }
+            
+            // 重置计时器
+            function resetTimer() {
+                pauseTimer();
+                timeLeft = isWorkMode ? workDuration : breakDuration;
+                modeIndicator.textContent = isWorkMode ? "专注时间" : "休息时间";
+                modeIndicator.className = isWorkMode ? "mode-indicator" : "mode-indicator break";
+                updateTimerDisplay();
+                progressBar.style.width = "0%";
+                
+                workTimeInput.disabled = false;
+                breakTimeInput.disabled = false;
+            }
+            
+            // 更新计时器
+            function updateTimer() {
+                const currentTime = Date.now();
+                const elapsedSeconds = Math.floor((currentTime - startTimestamp) / 1000);
+                
+                if (isWorkMode) {
+                    timeLeft = workDuration - elapsedSeconds;
+                } else {
+                    timeLeft = breakDuration - elapsedSeconds;
+                }
+                
+                // 更新进度条
+                const totalTime = isWorkMode ? workDuration : breakDuration;
+                const progress = ((totalTime - timeLeft) / totalTime) * 100;
+                progressBar.style.width = `${progress}%`;
+                
+                // 检查是否结束
+                if (timeLeft <= 0) {
+                    clearInterval(timerId);
+                    timeLeft = 0;
+                    
+                    // 触发提醒
+                    triggerReminders(isWorkMode ? "工作" : "休息");
+                    
+                    // 切换模式
+                    isWorkMode = !isWorkMode;
+                    modeIndicator.textContent = isWorkMode ? "专注时间" : "休息时间";
+                    modeIndicator.className = isWorkMode ? "mode-indicator" : "mode-indicator break";
+                    
+                    // 重置时间
+                    timeLeft = isWorkMode ? workDuration : breakDuration;
+                    startTimestamp = Date.now();
+                    
+                    // 如果是工作模式，重新启动计时器
+                    if (isWorkMode) {
+                        startTimer();
+                    } else {
+                        startBtn.disabled = false;
+                        pauseBtn.disabled = true;
+                        isRunning = false;
+                    }
+                }
+                
+                updateTimerDisplay();
+                
+                // 每5秒同步一次时间
+                if (Date.now() - lastSyncTime > 5000) {
+                    calibrateTime();
+                    lastSyncTime = Date.now();
+                }
+            }
+            
+            // 触发提醒功能
+            function triggerReminders(mode) {
+                // 播放提示音
+                playAlarmSound();
+                
+                // 显示通知
+                if (mode === "工作") {
+                    notificationTitle.textContent = "专注时间结束!";
+                    notificationMessage.textContent = "该休息一下了，站起来活动活动吧！";
+                    todayTomatoes++;
+                    totalTomatoes++;
+                    saveTomatoCount();
+                    updateCountDisplay();
+                    
+                    // 发送浏览器通知
+                    showBrowserNotification("专注时间结束!", "该休息一下了，站起来活动活动吧！");
+                } else {
+                    notificationTitle.textContent = "休息时间结束!";
+                    notificationMessage.textContent = "休息结束，准备开始新的专注时间！";
+                    
+                    // 发送浏览器通知
+                    showBrowserNotification("休息时间结束!", "休息结束，准备开始新的专注时间！");
+                }
+                
+                // 显示通知弹窗
+                showNotification();
+                
+                // 闪烁屏幕
+                flashScreen();
+            }
+            
+            // 播放提示音
+            function playAlarmSound() {
+                alarmSound.currentTime = 0;
+                alarmSound.play().catch(e => console.log("音频播放失败:", e));
+            }
+            
+            // 闪烁屏幕
+            function flashScreen() {
+                document.body.classList.add('flash');
+                setTimeout(() => {
+                    document.body.classList.remove('flash');
+                }, 3000);
+            }
+            
+            // 测试通知功能
+            function testNotifications() {
+                // 显示测试提示
+                testAlert.textContent = "正在测试所有通知功能...";
+                testAlert.classList.add('show');
+                
+                // 播放测试声音
+                playAlarmSound();
+                
+                // 显示测试通知弹窗
+                notificationTitle.textContent = "测试通知!";
+                notificationMessage.textContent = "这是一个测试通知，用于验证提醒功能是否正常工作";
+                showNotification();
+                
+                // 闪烁屏幕
+                flashScreen();
+                
+                // 尝试浏览器通知
+                showBrowserNotification("测试通知", "这是一个测试通知，用于验证提醒功能是否正常工作");
+                
+                // 3秒后隐藏测试提示
+                setTimeout(() => {
+                    testAlert.classList.remove('show');
+                }, 3000);
+            }
+            
+            // 显示浏览器通知
+            function showBrowserNotification(title, message) {
+                // 检查浏览器是否支持通知
+                if (!("Notification" in window)) {
+                    console.log("此浏览器不支持桌面通知");
+                    return;
+                }
+                
+                // 检查通知权限
+                if (Notification.permission === "granted") {
+                    // 创建通知
+                    const notification = new Notification(title, {
+                        body: message,
+                        icon: 'https://cdn-icons-png.flaticon.com/512/2917/2917633.png'
+                    });
+                    
+                    // 点击通知时关闭它
+                    notification.onclick = function() {
+                        window.focus();
+                        notification.close();
+                    };
+                }
+            }
+            
+            // 更新计时器显示
+            function updateTimerDisplay() {
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }
+            
+            // 更新工作时间
+            function updateWorkTime() {
+                const newTime = parseInt(workTimeInput.value);
+                if (newTime > 0 && newTime <= 120) {
+                    workDuration = newTime * 60;
+                    if (!isRunning && isWorkMode) {
+                        timeLeft = workDuration;
+                        updateTimerDisplay();
+                    }
+                } else {
+                    workTimeInput.value = 25;
+                    workDuration = 25 * 60;
+                }
+            }
+            
+            // 更新休息时间
+            function updateBreakTime() {
+                const newTime = parseInt(breakTimeInput.value);
+                if (newTime > 0 && newTime <= 60) {
+                    breakDuration = newTime * 60;
+                    if (!isRunning && !isWorkMode) {
+                        timeLeft = breakDuration;
+                        updateTimerDisplay();
+                    }
+                } else {
+                    breakTimeInput.value = 5;
+                    breakDuration = 5 * 60;
+                }
+            }
+            
+            // 显示通知弹窗
+            function showNotification() {
+                notification.classList.add('show');
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                }, 5000);
+            }
+            
+            // 处理页面可见性变化
+            function handleVisibilityChange() {
+                if (document.visibilityState === 'hidden') {
+                    // 页面进入后台
+                    backgroundStartTime = Date.now();
+                } else {
+                    // 页面返回前台
+                    if (isRunning) {
+                        const backgroundElapsed = Date.now() - backgroundStartTime;
+                        backgroundTime += backgroundElapsed;
+                        
+                        // 校准时间
+                        calibrateTime();
+                    }
+                }
+            }
+            
+            // 更新网络状态
+            function updateNetworkStatus() {
+                const isOnline = navigator.onLine;
+                networkStatus.classList.toggle('offline', !isOnline);
+                networkStatus.querySelector('.status-value').textContent = isOnline ? '在线' : '离线';
+            }
+            
+            // 时间校准函数
+            function calibrateTime() {
+                if (isRunning) {
+                    const expectedElapsed = Date.now() - startTimestamp;
+                    const actualElapsed = (isWorkMode ? workDuration : breakDuration) - timeLeft;
+                    const timeDiff = actualElapsed * 1000 - expectedElapsed;
+                    
+                    if (Math.abs(timeDiff) > 1000) {
+                        // 时间偏差超过1秒，进行校准
+                        startTimestamp = Date.now() - actualElapsed * 1000;
+                        syncStatus.innerHTML = `<i class="fas fa-sync-alt fa-spin"></i> 时间校准中...`;
+                        
+                        setTimeout(() => {
+                            syncStatus.innerHTML = `<i class="fas fa-sync-alt"></i> 时间已校准`;
+                            
+                            // 更新最后校准时间
+                            const now = new Date();
+                            lastSync.textContent = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
+                        }, 1000);
+                    }
+                }
+            }
+            
+            // 显示权限帮助信息
+            window.showPermissionHelp = function() {
+                alert("要启用通知功能：\n1. 点击浏览器地址栏左侧的锁形图标或信息图标\n2. 找到'通知'选项\n3. 将其设置为'允许'\n4. 刷新页面后生效");
+                return false;
+            };
+        });
+    </script>
+</body>
+</html>
